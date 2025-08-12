@@ -1,14 +1,24 @@
 <template>
   <div class="gallery-container">
     <h2>🌿 Nature Gallery</h2>
+
+    <!-- Search bar -->
+    <input
+      v-model="searchQuery"
+      type="text"
+      placeholder="Search images..."
+      class="search-bar"
+    />
+
     <div class="gallery">
       <div
-        v-for="(image, index) in images"
+        v-for="(image, index) in filteredImages"
         :key="index"
         class="gallery-item"
       >
         <img :src="image.src" :alt="image.alt" @click="selectImage(index)" />
         <button class="delete-btn" @click="deleteImage(index)">Delete</button>
+        <p class="image-title">{{ image.title }}</p> <!-- Display title -->
       </div>
     </div>
 
@@ -43,12 +53,13 @@ export default {
   name: "ImageGallery",
   data() {
     return {
+      searchQuery: "",
       images: Array.from({ length: 15 }, (_, i) => ({
-  src: `https://picsum.photos/seed/nature${i + 1}/900/600`,
-  alt: `Image ${i + 1}`,
-  title: "",
-  description: ""
-})),
+        src: `https://picsum.photos/seed/nature${i + 1}/900/600`,
+        alt: `Image ${i + 1}`,
+        title: `Nature Photo ${i + 1}`,
+        description: `Beautiful view of nature ${i + 1}`
+      })),
       deletedImages: [],
       selectedImageIndex: null,
       zoom: 1
@@ -60,20 +71,33 @@ export default {
     },
     selectedImage() {
       return this.images[this.selectedImageIndex];
+    },
+    filteredImages() {
+      if (!this.searchQuery) return this.images;
+      const query = this.searchQuery.toLowerCase();
+      return this.images.filter(
+        img =>
+          img.alt.toLowerCase().includes(query) ||
+          img.title.toLowerCase().includes(query) ||
+          img.description.toLowerCase().includes(query)
+      );
     }
   },
   methods: {
     selectImage(index) {
-      this.selectedImageIndex = index;
+      // Adjust for filtered list
+      const originalIndex = this.images.indexOf(this.filteredImages[index]);
+      this.selectedImageIndex = originalIndex;
       this.zoom = 1;
     },
     closeLightbox() {
       this.selectedImageIndex = null;
     },
     deleteImage(index) {
-      const removed = this.images.splice(index, 1)[0];
+      const originalIndex = this.images.indexOf(this.filteredImages[index]);
+      const removed = this.images.splice(originalIndex, 1)[0];
       this.deletedImages.push(removed);
-      if (index === this.selectedImageIndex) this.closeLightbox();
+      if (originalIndex === this.selectedImageIndex) this.closeLightbox();
     },
     restoreImage() {
       if (this.deletedImages.length) {
@@ -105,6 +129,15 @@ export default {
   max-width: 100%;
   margin: auto;
 }
+.search-bar {
+  display: block;
+  width: 300px;
+  margin: 0 auto 20px;
+  padding: 8px;
+  font-size: 1rem;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+}
 .gallery {
   display: flex;
   flex-wrap: wrap;
@@ -113,7 +146,7 @@ export default {
 }
 .gallery-item {
   position: relative;
-  width: 300px; 
+  width: 300px;
   transition: transform 0.3s;
 }
 .gallery-item:hover {
