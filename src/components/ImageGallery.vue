@@ -30,7 +30,7 @@
         @wheel="zoomImage"
         :style="{ transform: 'scale(' + zoom + ')' }"
       />
-      <button @click="nextImage" class="nav-btn">⟩</button>
+      <button @click="nextImage" class="nav-btn">⟩</button>_
       <button @click="closeLightbox" class="close-btn">X</button>
       <div class="meta">
         <label>Title: <input v-model="selectedImage.title" /></label>
